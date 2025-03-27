@@ -1,14 +1,14 @@
-# Project Name
+# Reflective RAG with Taxonomy
 
-(short, 1-3 sentenced, description of the project)
+Many teams have hit the limits of Naive or Basic RAG. There are a number of approaches that improve RAG quality. This repo demonstrates some of them.
 
 ## Features
 
-This project framework provides the following features:
+The project includes demonstrations of:
 
-* Feature 1
-* Feature 2
-* ...
+* Reflection and evaluation
+* Taxonomy extraction
+* Query rephrase
 
 ## Getting Started
 
