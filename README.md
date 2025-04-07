@@ -1,57 +1,71 @@
 # Reflective RAG with Taxonomy
 
-Many teams have hit the limits of Naive or Basic RAG. There are a number of approaches that improve RAG quality. This repo demonstrates some of them.
+Many teams have hit the limits of Naive or Basic RAG. There are a number of approaches that improve RAG quality. This repo demonstrates some of them with a multi-agent approach.
 
 ## Features
 
 The project includes demonstrations of:
 
-* Reflection and evaluation
-* Taxonomy extraction
-* Query rephrase
+* Taxonomy-based multi-agent research
+* Reflection and evaluation of search results
+* Automated taxonomy extraction from user queries
+* Intelligent search query formulation
+* Distributed research using LangGraph workflows
+* Result consolidation with comprehensive answer generation
 
 ## Getting Started
 
 ### Prerequisites
 
-(ideally very short, if any)
-
-- OS
-- Library version
-- ...
+- Python 3.12
+- Azure Search service
+- Azure OpenAI service
+- Required environment variables:
+  - AZURE_SEARCH_ENDPOINT
+  - AZURE_SEARCH_KEY
+  - AZURE_SEARCH_INDEX
+  - AOAI_DEPLOYMENT
+  - AOAI_KEY
+  - AOAI_ENDPOINT
 
 ### Installation
 
-(ideally very short)
+```bash
+# Clone the repository
+git clone https://github.com/Azure-Samples/reflective-rag-with-taxonomy.git
+cd reflective-rag-with-taxonomy
 
-- npm install [package name]
-- mvn install
-- ...
+# Install dependencies
+pip install -r requirements.txt
+```
 
 ### Quickstart
-(Add steps to get up and running quickly)
 
-1. git clone [repository clone url]
-2. cd [repository name]
-3. ...
+1. Set up your .env file with the required Azure credentials
+2. Ensure your Azure Search index is populated with documents
+3. Run the multi-agent RAG system:
+
+```bash
+python backend/multi-agent-rag.py
+```
+
+## How It Works
+
+The system uses a multi-agent approach to answer complex questions:
+
+1. **Taxonomy Extraction**: Breaks down the user's question into 2-5 distinct taxonomies (categories) for research
+2. **Distributed Research**: Assigns each taxonomy to a dedicated research agent
+3. **Intelligent Search**: Each agent formulates optimized search queries for its taxonomy
+4. **Result Evaluation**: Agents review search results to determine relevance and reliability
+5. **Consolidation**: Results from all agents are combined
+6. **Answer Generation**: A comprehensive response is created by synthesizing all research findings
 
 
-## Demo
+## Architecture
 
-A demo app is included to show how to use the project.
+The project uses:
+- LangGraph for the agent workflow orchestration
+- Azure Search for document retrieval (with both semantic and vector search)
+- Azure OpenAI for language understanding and generation
+- Pydantic for structured data validation
 
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
-
-## Resources
-
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...

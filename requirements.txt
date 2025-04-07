@@ -1,0 +1,10 @@
+python-dotenv==1.0.1
+azure-search-documents==11.4.0
+langchain-openai==0.2.3
+langsmith==0.1.135
+pyodbc==5.2.0
+azure-identity
+pydantic==2.9.2
+langgraph==0.2.56
+azure-ai-documentintelligence==1.0.0b2
+azure-storage-blob==12.22.0
