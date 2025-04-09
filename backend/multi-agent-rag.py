@@ -13,7 +13,8 @@ from langgraph.constants import Send
 import operator
 import json
 
-load_dotenv()
+#load_dotenv()
+load_dotenv(dotenv_path="example.env")
 
 # Azure Search configuration
 ai_search_endpoint = os.environ["AZURE_SEARCH_ENDPOINT"]
@@ -118,7 +119,7 @@ def format_search_results(results: List[SearchResult]) -> str:
             "=" * 80,
             f"ID: {result['id']}",
             f"Source File: {result['source_file']}",
-            f"Source Pages: {result['source_pages']}",
+           # f"Source Pages: {result['source_pages']}",
             "\n<Start Content>",
             "-" * 80,
             result['content'],
@@ -156,7 +157,8 @@ def run_search(search_query: str, processed_ids: Set[str], category_filter: str 
         search_text=search_query,
         vector_queries=[vector_query],
         filter=filter_str,
-        select=["id", "content", "source_file", "source_pages"],
+        #select=["id", "content", "source_file", "source_pages"],
+        select=["id", "content", "source_file"],
         top=NUM_SEARCH_RESULTS
     )
     
@@ -166,7 +168,7 @@ def run_search(search_query: str, processed_ids: Set[str], category_filter: str 
             id=result["id"],
             content=result["content"],
             source_file=result["source_file"],
-            source_pages=result["source_pages"],
+            #source_pages=result["source_pages"],
             score=result["@search.score"]
         )
         search_results.append(search_result)
@@ -602,3 +604,34 @@ if __name__ == "__main__":
             print(json.dumps(final_payload, indent=2))
         else:
             print("\nUnable to find a satisfactory answer.")
+
+def run_multi_agent_conversation(user_input: str) -> Dict[str, Any]:
+    """
+    Expose the main functionality as a callable function for API.
+    """
+    graph = build_main_graph()
+    state: MainState = {
+        "user_input": user_input,
+        "taxonomies": [],
+        "research_results": [],
+        "final_answer": None,
+        "thought_process": [],
+        "research_outputs": [],
+    }
+
+    # Initialize state - matching the report builder pattern
+    initial_state = MainState(
+            user_input=user_input,
+            taxonomies=[],
+            research_results=[],
+            research_outputs=[],  # Will be populated by the research agents
+            final_answer=None,
+            thought_process=[]
+        )
+        
+    final_state = graph.invoke(initial_state)
+    
+    return final_state
+    
+
+    
