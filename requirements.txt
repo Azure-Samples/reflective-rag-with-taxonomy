@@ -8,4 +8,7 @@ pydantic==2.9.2
 langgraph==0.2.56
 azure-ai-documentintelligence==1.0.0b2
 azure-storage-blob==12.22.0
+azure-identity
+fastapi
+uvicorn[standard]
 langchain-text-splitters==0.3.8
