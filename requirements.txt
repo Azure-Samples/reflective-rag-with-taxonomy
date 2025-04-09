@@ -11,3 +11,4 @@ azure-storage-blob==12.22.0
 azure-identity
 fastapi
 uvicorn[standard]
+langchain-text-splitters==0.3.8
