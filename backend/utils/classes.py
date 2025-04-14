@@ -42,6 +42,7 @@ class TaxonomyExtraction(BaseModel):
 # Main state for the overall workflow
 class MainState(TypedDict):
     user_input: str
+    user_history: str
     taxonomies: List[str]
     research_results: List[Dict[str, Any]]
     final_answer: str | None
@@ -59,6 +60,7 @@ class ResearchOutputState(TypedDict):
 class ResearchState(TypedDict):
     taxonomy: str
     user_input: str
+    user_history: str
     current_results: List[SearchResult]
     vetted_results: List[SearchResult]
     discarded_results: List[SearchResult]
@@ -66,5 +68,18 @@ class ResearchState(TypedDict):
     reviews: List[str]  # Thought processes from reviews
     decisions: List[str]  # Store the actual decisions
     attempts: int  # Track number of search attempts
+    search_history: List[Dict[str, Any]]  # Track previous search queries and filters
+    thought_process: List[Dict[str, Any]]  # List of thought process steps
+
+class ChatState(TypedDict):
+    user_input: str
+    current_results: List[Any]
+    vetted_results: List[Any]
+    discarded_results: List[Any]
+    processed_ids: Set[str]  # Track all processed document IDs
+    reviews: List[str]       # Thought processes from reviews
+    decisions: List[str]     # Store the actual decisions
+    final_answer: str | None
+    attempts: int            # Track number of search attempts
     search_history: List[Dict[str, Any]]  # Track previous search queries and filters
     thought_process: List[Dict[str, Any]]  # List of thought process steps
