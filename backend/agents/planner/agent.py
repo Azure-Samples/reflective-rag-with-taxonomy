@@ -17,7 +17,7 @@ class TaxonomyLLM(LLM):
         
         messages = [
             {"role": "system", "content": taxonomy_prompt},
-            {"role": "user", "content": f"Extract taxonomies from this question: {state['user_input']}"}
+           {"role": "user", "content": f"Extract taxonomies from this question: {state['user_input']}. Make sure to take into consideration this chat history:{state['user_history']}"}
         ]
         
         taxonomy_response = self.__model.invoke(messages)
@@ -44,6 +44,7 @@ class TaxonomyLLM(LLM):
             Send("research_agent", {
                 "taxonomy": taxonomy,
                 "user_input": state["user_input"],
+                "user_history": state["user_history"],
                 "current_results": [],
                 "vetted_results": [],
                 "discarded_results": [],

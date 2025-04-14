@@ -119,6 +119,7 @@ class ReviewLLM(LLM):
         
         llm_input = review_prompt.format(
             question=state["user_input"],
+            history=state["user_history"],
             taxonomy=state["taxonomy"],
             current_results=current_results_formatted,
             vetted_results=vetted_results_formatted,

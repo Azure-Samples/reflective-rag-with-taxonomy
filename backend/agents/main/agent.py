@@ -1,4 +1,6 @@
-from backend.utils.classes import MainState
+from typing import Generator, Dict, Any, List, Set, TypedDict
+
+from backend.utils.classes import MainState,ChatState
 from backend.agents.consolidation.agent import Consolidate
 from backend.agents.research.agent import ReviewLLM
 from backend.agents.planner.agent import TaxonomyLLM
@@ -13,6 +15,51 @@ load_dotenv(dotenv_path="example.env")
 aoai_deployment = os.getenv("OPENAI_API_VERSION")
 aoai_key = os.getenv("AZURE_OPENAI_API_KEY")
 aoai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+
+# Define the main graph invocation method
+def graph_invoke(initial_state: ChatState) -> Generator[Dict[str, Any], None, ChatState]:
+    """
+    Master generator that chains the graph nodes created by build_main_graph.
+    It loops through each step in the graph, updating the state as it proceeds.
+    """
+    # Build the main graph (workflow) to define the nodes and edges
+    builder = build_main_graph()
+
+    # Initialize the state with the initial input from the user
+    state = initial_state
+    current_node = "identify_taxonomies"  # Start with the first node
+
+    while True:
+        # Log current node and state
+        print(f"Processing node: {current_node}")
+        print(f"Current state: {state}")
+        
+        # Execute the current node's method in the workflow
+        current_node_method = builder.get_node_method(current_node)
+        result = current_node_method(state)
+        
+        # Update the state with the result of the node execution
+        state = result
+
+        # Log result
+        print(f"Step result from {current_node}: {result}")
+
+        # Determine the next node based on the edges defined in the graph
+        next_nodes = builder.get_next_nodes(current_node)
+        if not next_nodes:
+            break  # If no next nodes, end the loop
+
+        # Update the current node for the next iteration
+        current_node = next_nodes[0]  # For simplicity, just take the first next node
+
+        # Decision-making process
+        decision = state["decisions"][-1] if state["decisions"] else "finalize"
+        if decision == "finalize":
+            break
+
+    print(f"Final answer: {state['final_answer']}")
+    return state
 
 def build_main_graph():
     """Build the main workflow graph"""
