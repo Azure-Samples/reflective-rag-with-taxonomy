@@ -5,10 +5,11 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from backend.utils.classes import MainState,ChatState, data_queue, QuestionRequest
 from backend.agents.main.agent import build_main_graph
+import time
 
-#app = FastAPI()
+app = FastAPI()
 
-#@app.post("/process")
+@app.post("/process")
 async def process_question(request: QuestionRequest):
     user_input = request.user_input
     history = request.history
@@ -27,6 +28,16 @@ async def process_question(request: QuestionRequest):
     final_state = await graph.ainvoke(initial_state)
 
     if final_state["final_answer"]:
+        
+        current_time = time.time()
+
+        await data_queue.put(
+            {
+                "message_source": "Final Answer",
+                "message_content": final_state["final_answer"],
+                "message_timestamp": current_time,
+            }
+        )
 
         return JSONResponse(
             {
@@ -41,7 +52,7 @@ async def process_question(request: QuestionRequest):
             {"error": "Unable to find a satisfactory answer."}, status_code=400
         )
 
-#@app.websocket("/ws/results")
+@app.websocket("/ws/results")
 async def stream_results(user_updates: WebSocket):
     await user_updates.accept()  # Accept the WebSocket connection
     try:
@@ -67,12 +78,12 @@ async def stream_results(user_updates: WebSocket):
 #     )
 
 
-if __name__ == "__main__":
-    #import uvicorn
-    #uvicorn.run(app, port=8000)
-    import asyncio
+# if __name__ == "__main__":
+#     #import uvicorn
+#     #uvicorn.run(app, port=8000)
+#     import asyncio
     
-    asyncio.run(process_question(QuestionRequest(
-        user_input="What are the taxonomies of the PwC internal repo?",
-        history=""
-    )))
+#     asyncio.run(process_question(QuestionRequest(
+#         user_input="What are the tax implications for a small business owner when they receive a grant from the government?",
+#         history=""
+#     )))
