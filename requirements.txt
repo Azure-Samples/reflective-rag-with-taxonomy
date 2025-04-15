@@ -12,4 +12,3 @@ azure-identity
 fastapi
 uvicorn[standard]
 langchain-text-splitters==0.3.8
-sse-starlette==0.11.0
