@@ -1,6 +1,7 @@
 from backend.utils.llm import LLM
 from backend.utils.classes import *
 import backend.agents.planner.prompts as prompts
+import time
 
 from langgraph.constants import Send
 
@@ -9,9 +10,10 @@ class TaxonomyLLM(LLM):
         super().__init__()
         self.__model = LLM._llm_model.with_structured_output(TaxonomyExtraction)
     
-    def identify_taxonomies(self,state: MainState) -> MainState:
+    async def identify_taxonomies(self,state: MainState) -> MainState:
         """Extract taxonomies from the user's question"""
-        print('Identifying taxonomies from the question')
+        
+        await self.__push_updates(message_source="Planner Agent", push_update="Extracting taxonomies from the user question")
         
         taxonomy_prompt = prompts.TAXONOMY_PROMPT
         
@@ -32,13 +34,14 @@ class TaxonomyLLM(LLM):
             }
         })
         
-        print(f"Identified taxonomies: {state['taxonomies']}")
+        await self.__push_updates(message_source="Planner Agent", push_update=f"Identified taxonomies from the user question: {state['taxonomies']}")
         
         return state
     
-    def distribute_research_tasks(self,state: MainState) -> list:
+    async def distribute_research_tasks(self,state: MainState) -> list:
         """Distribute research tasks to individual research agents based on taxonomies"""
-        print(f"Distributing {len(state['taxonomies'])} research tasks to agents")
+        
+        await self.__push_updates(message_source="Planner Agent", push_update="Initiating research agents for each extracted taxonomy")
         
         return [
             Send("research_agent", {
@@ -56,3 +59,16 @@ class TaxonomyLLM(LLM):
                 "thought_process": []
             }) for taxonomy in state["taxonomies"]
         ]
+    
+    async def __push_updates(self, message_source: str, push_update: str) -> None:
+        """Push updates to the user"""
+        # Implement a mechanism to send update messages to the user
+        current_time = time.time()
+
+        await data_queue.put({
+            "message_source": message_source,
+            "message_content": push_update,
+            "message_timestamp": current_time,
+        })
+
+        print(f"UX UPDATE - Agent Type: {message_source}, Message: {push_update}, Message Time: {current_time}")

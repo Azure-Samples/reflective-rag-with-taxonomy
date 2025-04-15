@@ -1,12 +1,14 @@
 from backend.utils.classes import *
 from backend.utils.llm import LLM
 import backend.agents.consolidation.prompts as prompts
+import time
 
 class Consolidate():
 
-    def consolidate_results(self,state: MainState) -> MainState:
+    async def consolidate_results(self,state: MainState) -> MainState:
         """Consolidate results from all research agents"""
-        print("Consolidating results from all research agents")
+        
+        await self.__push_updates(message_source="Consolidation Agent", push_update= "Consolidating results from all the research agents")
         
         # The research_outputs are automatically collected via the Annotated field
         # These will be a list of dictionaries with taxonomy and vetted_results
@@ -26,9 +28,10 @@ class Consolidate():
         
         return state
 
-    def final_inference(self,state: MainState) -> MainState:
+    async def final_inference(self,state: MainState) -> MainState:
         """Generate final answer by synthesizing all research results"""
-        print("Generating final answer")
+        
+        await self.__push_updates(message_source="Consolidation Agent", push_update= "Generating final answer by synthesizing all research results")
         
         final_prompt = prompts.CONSOLIDATION_PROMPT
         
@@ -67,3 +70,16 @@ class Consolidate():
         })
         
         return state
+    
+    async def __push_updates(self, message_source: str, push_update: str) -> None:
+        """Push updates to the user"""
+        # Implement a mechanism to send update messages to the user
+        current_time = time.time()
+
+        await data_queue.put({
+            "message_source": message_source,
+            "message_content": push_update,
+            "message_timestamp": current_time,
+        })
+
+        print(f"UX UPDATE - Agent Type: {message_source}, Message: {push_update}, Message Time: {current_time}")

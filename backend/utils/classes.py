@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Dict, Any, Literal, Set, TypedDict, Annotated
 import operator
+import asyncio
+
+data_queue = asyncio.Queue()
 
 NUM_SEARCH_RESULTS = 5
 
@@ -15,6 +18,9 @@ class SearchResult(TypedDict):
     source_pages: int
     score: float
 
+class QuestionRequest(BaseModel):
+    user_input: str
+    history: str
 
 class ReviewDecision(BaseModel):
     """Schema for review agent decisions"""

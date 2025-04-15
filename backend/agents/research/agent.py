@@ -12,7 +12,7 @@ import backend.agents.research.prompts as prompts
 from typing import List, Set
 from dotenv import load_dotenv
 import os
-
+import time
 
 
 load_dotenv(dotenv_path="example.env")
@@ -98,10 +98,11 @@ class ReviewLLM(LLM):
         
         return search_results
 
-    def __review_results(self, state: ResearchState) -> ResearchState | ResearchOutputState:
+    async def __review_results(self, state: ResearchState) -> ResearchState | ResearchOutputState:
         """Review current results and categorize them as valid or invalid.
         When review decision is 'finalize', return the final output directly."""
-        print(f'Reviewing search results for taxonomy: {state["taxonomy"]}')
+        
+        await self.__push_updates(message_source="Research Agent", push_update= f"Evaluating search attempt {state['attempts']} for taxonomy: {state['taxonomy']}")
 
         review_prompt = prompts.REVIEW_PROMPT
 
@@ -162,7 +163,7 @@ class ReviewLLM(LLM):
         
         # If maximum attempts reached or decision is finalize, return the final output
         if review.decision == "finalize" or state["attempts"] >= MAX_ATTEMPTS:
-            print(f"Finalizing research for taxonomy: {state['taxonomy']}")
+            await self.__push_updates(message_source="Research Agent", push_update= f"Finalizing research for taxonomy: {state['taxonomy']}")
             
             # Create a result dictionary for this taxonomy
             taxonomy_result = {
@@ -206,9 +207,9 @@ class ReviewLLM(LLM):
     def get_research_graph(self):
         return self.__research_graph
     
-    def __generate_search_query(self, state: ResearchState) -> ResearchState:
+    async def __generate_search_query(self, state: ResearchState) -> ResearchState:
         """Generate an optimized search query based on the current state"""
-        print(f'Generating search query for taxonomy: {state["taxonomy"]}')
+        await self.__push_updates(message_source="Research Agent", push_update= f"Generating search query for taxonomy: {state['taxonomy']}")
         state["attempts"] += 1
         
         query_prompt = prompts.QUERY_PROMPT
@@ -263,10 +264,10 @@ class ReviewLLM(LLM):
         
         return state
     
-    def __review_router(self, state: ResearchState) -> str:
+    async def __review_router(self, state: ResearchState) -> str:
         """Route to either retry search or go to END (finalize happens in review_results now)"""
         if state["attempts"] >= MAX_ATTEMPTS:
-            print(f"\nReached maximum attempts ({MAX_ATTEMPTS}) for taxonomy {state['taxonomy']}. Proceeding to finalize.")
+            await self.__push_updates(message_source="Research Agent", push_update= f"\nReached maximum attempts ({MAX_ATTEMPTS}) for taxonomy {state['taxonomy']}. Proceeding to finalize.")
             return "finalize"
         
         latest_decision = state["decisions"][-1]
@@ -274,3 +275,16 @@ class ReviewLLM(LLM):
             return "finalize"
         
         return "retry"
+    
+    async def __push_updates(self, message_source: str, push_update: str) -> None:
+        """Push updates to the user"""
+        # Implement a mechanism to send update messages to the user
+        current_time = time.time()
+
+        await data_queue.put({
+            "message_source": message_source,
+            "message_content": push_update,
+            "message_timestamp": current_time,
+        })
+
+        print(f"UX UPDATE - Agent Type: {message_source}, Message: {push_update}, Message Time: {current_time}")
